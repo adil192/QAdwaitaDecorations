@@ -27,6 +27,8 @@
 #include <QScopeGuard>
 
 #include <QtGui/QColor>
+#include <QtGui/QGuiApplication>
+#include <QtGui/QPalette>
 #include <QtGui/QPainter>
 #include <QtGui/QPainterPath>
 
@@ -180,22 +182,56 @@ void QAdwaitaDecorations::initConfiguration()
     updateIcons();
 }
 
+static QColor makeTransparent(const QColor &color, qreal level)
+{
+    QColor transparentColor = color;
+    transparentColor.setAlphaF(level);
+    return transparentColor;
+}
+
 void QAdwaitaDecorations::updateColors(bool useDarkColors)
 {
     qCDebug(QAdwaitaDecorationsLog)
             << "Changing color scheme to " << (useDarkColors ? "dark" : "light");
 
-    m_colors = { { Background, useDarkColors ? QColor(0x2e2e32) : QColor(0xffffff) },
-                 { BackgroundInactive, useDarkColors ? QColor(0x222226) : QColor(0xfafafb) },
-                 { Foreground, useDarkColors ? QColor(0xffffff) : QColor(0x333338) },
-                 { ForegroundInactive, useDarkColors ? QColor(0x919193) : QColor(0x969699) },
-                 { Border, useDarkColors ? QColor(0x3d3d40) : QColor(0xc8c8c8) },
-                 { BorderInactive, useDarkColors ? QColor(0x313135) : QColor(0xe2e2e2) },
-                 { Shadow, useDarkColors ? QColor(0x2e2e32) : QColor(0x2e2e32) },
-                 { ButtonBackground, QColorConstants::Transparent },
-                 { ButtonBackgroundInactive, QColorConstants::Transparent },
-                 { HoveredButtonBackground, useDarkColors ? QColor(0x4d4d51) : QColor(0xe0e0e1) },
-                 { PressedButtonBackground, useDarkColors ? QColor(0x6c6c6f) : QColor(0xc2c2c3) } };
+    const QPalette palette = QGuiApplication::palette();
+    const bool isPaletteDark = palette.color(QPalette::Window).lightness() < 128;
+
+    if (useDarkColors == isPaletteDark) {
+        // If darkness matches, use palette from system theme
+        const QColor highlight = palette.color(QPalette::Highlight);
+        m_colors = {
+            { Background, palette.color(QPalette::Active, QPalette::Window) },
+            { BackgroundInactive, palette.color(QPalette::Inactive, QPalette::Window) },
+            { Foreground, palette.color(QPalette::Active, QPalette::WindowText) },
+            { ForegroundInactive, palette.color(QPalette::Inactive, QPalette::WindowText) },
+            { Border,
+              useDarkColors ? palette.color(QPalette::Dark) : palette.color(QPalette::Light) },
+            { BorderInactive,
+              useDarkColors ? palette.color(QPalette::Mid) : palette.color(QPalette::Midlight) },
+            { Shadow, palette.color(QPalette::Dark) },
+            { ButtonBackground, QColorConstants::Transparent },
+            { ButtonBackgroundInactive, QColorConstants::Transparent },
+            { HoveredButtonBackground, makeTransparent(highlight, 0.1) },
+            { PressedButtonBackground, makeTransparent(highlight, 0.5) }
+        };
+    } else {
+        // Otherwise, use regular Adwaita colors
+        m_colors = {
+            { Background, useDarkColors ? QColor(0x2e2e32) : QColor(0xffffff) },
+            { BackgroundInactive, useDarkColors ? QColor(0x222226) : QColor(0xfafafb) },
+            { Foreground, useDarkColors ? QColor(0xffffff) : QColor(0x333338) },
+            { ForegroundInactive, useDarkColors ? QColor(0x919193) : QColor(0x969699) },
+            { Border, useDarkColors ? QColor(0x3d3d40) : QColor(0xc8c8c8) },
+            { BorderInactive, useDarkColors ? QColor(0x313135) : QColor(0xe2e2e2) },
+            { Shadow, useDarkColors ? QColor(0x2e2e32) : QColor(0x2e2e32) },
+            { ButtonBackground, QColorConstants::Transparent },
+            { ButtonBackgroundInactive, QColorConstants::Transparent },
+            { HoveredButtonBackground, useDarkColors ? QColor(0x4d4d51) : QColor(0xe0e0e1) },
+            { PressedButtonBackground, useDarkColors ? QColor(0x6c6c6f) : QColor(0xc2c2c3) }
+        };
+    }
+
     forceRepaint();
 }
 
@@ -374,13 +410,6 @@ QMargins QAdwaitaDecorations::margins() const
                     ceWindowBorderWidth, ceWindowBorderWidth);
 }
 #endif
-
-static QColor makeTransparent(const QColor &color, qreal level)
-{
-    QColor transparentColor = color;
-    transparentColor.setAlphaF(level);
-    return transparentColor;
-}
 
 void QAdwaitaDecorations::paint(QPaintDevice *device)
 {
