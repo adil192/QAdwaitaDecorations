@@ -5,7 +5,8 @@ project(QAdwaitaDecorations
     DESCRIPTION "Qt Wayland decoration plugin using libadwaita style"
     LANGUAGES CXX C)
 
-option(USE_QT6 "Use Qt6 instead of Qt5" OFF)
+option(USE_QT6 "Use Qt6 instead of Qt5" ON)
+set(QT_NO_PRIVATE_MODULE_WARNING ON)
 
 set(CMAKE_AUTOMOC ON)
 
