@@ -45,11 +45,13 @@
 #include <QtDBus/QDBusVariant>
 #include <QtDBus/QtDBus>
 
-static constexpr int ceButtonSpacing = 12;
-static constexpr int ceButtonWidth = 24;
-static constexpr int ceCornerRadius = 12;
+static constexpr int ceButtonSpacing = 0;
+static constexpr int ceCornerRadius = 8;
 static constexpr int ceShadowsWidth = 10;
-static constexpr int ceTitlebarHeight = 38;
+static constexpr int ceTitlebarHeight = 32;
+static constexpr int ceButtonHeight = ceTitlebarHeight;
+static constexpr int ceButtonWidth = ceButtonHeight * 1.8;
+static constexpr int ceIconSize = 20;
 static constexpr int ceWindowBorderWidth = 1;
 
 static QMap<QAdwaitaDecorations::ButtonIcon, QString> buttonMap = {
@@ -190,8 +192,8 @@ void QAdwaitaDecorations::updateColors(bool useDarkColors)
                  { Border, useDarkColors ? QColor(0x3d3d40) : QColor(0xc8c8c8) },
                  { BorderInactive, useDarkColors ? QColor(0x313135) : QColor(0xe2e2e2) },
                  { Shadow, useDarkColors ? QColor(0x2e2e32) : QColor(0x2e2e32) },
-                 { ButtonBackground, useDarkColors ? QColor(0x434347) : QColor(0xebebeb) },
-                 { ButtonBackgroundInactive, useDarkColors ? QColor(0x2d2d31) : QColor(0xf0f0f1) },
+                 { ButtonBackground, QColorConstants::Transparent },
+                 { ButtonBackgroundInactive, QColorConstants::Transparent },
                  { HoveredButtonBackground, useDarkColors ? QColor(0x4d4d51) : QColor(0xe0e0e1) },
                  { PressedButtonBackground, useDarkColors ? QColor(0x6c6c6f) : QColor(0xc2c2c3) } };
     forceRepaint();
@@ -324,10 +326,10 @@ QRectF QAdwaitaDecorations::buttonRect(Button button) const
 
     yPos = margins().top();
     yPos += margins().bottom();
-    yPos -= ceButtonWidth;
+    yPos -= ceButtonHeight;
     yPos /= 2;
 
-    return QRectF(xPos, yPos, ceButtonWidth, ceButtonWidth);
+    return QRectF(xPos, yPos, ceButtonWidth, ceButtonHeight);
 }
 
 #ifdef HAS_QT6_SUPPORT
@@ -561,11 +563,22 @@ void QAdwaitaDecorations::paint(QPaintDevice *device)
 static void renderFlatRoundedButtonFrame(QAdwaitaDecorations::Button button, QPainter *painter,
                                          const QRect &rect, const QColor &color)
 {
+
+    const int radius = (button == QAdwaitaDecorations::Button::Close) ? ceCornerRadius : 0;
+    QPainterPath path;
+
+    path.moveTo(rect.topLeft());
+    path.lineTo(rect.right() - radius, rect.top());
+    path.arcTo(rect.right() - radius * 2, rect.top(), radius * 2, radius * 2, 90, -90);
+    path.lineTo(rect.bottomRight());
+    path.lineTo(rect.bottomLeft());
+    path.closeSubpath();
+
     painter->save();
     painter->setRenderHint(QPainter::Antialiasing, true);
     painter->setPen(Qt::NoPen);
     painter->setBrush(color);
-    painter->drawEllipse(rect);
+    painter->drawPath(path);
     painter->restore();
 }
 
@@ -599,7 +612,7 @@ static void renderButtonIcon(QAdwaitaDecorations::ButtonIcon buttonIcon, QPainte
 
     painter->save();
     painter->setRenderHints(QPainter::Antialiasing, true);
-    painter->drawPixmap(rect, QIcon::fromTheme(iconName).pixmap(ceButtonWidth, ceButtonWidth));
+    painter->drawPixmap(rect, QIcon::fromTheme(iconName).pixmap(ceButtonWidth, ceButtonHeight));
 
     painter->restore();
 }
@@ -644,8 +657,8 @@ void QAdwaitaDecorations::paintButton(Button button, QPainter *painter)
     renderFlatRoundedButtonFrame(button, painter, btnRect, buttonBackgroundColor);
 
     QRect adjustedBtnRect = btnRect;
-    adjustedBtnRect.setSize(QSize(16, 16));
-    adjustedBtnRect.translate(4, 4);
+    adjustedBtnRect.setSize(QSize(ceIconSize, ceIconSize));
+    adjustedBtnRect.translate((ceButtonWidth - ceIconSize) / 2, (ceButtonHeight - ceIconSize) / 2);
     const QString svgIcon = m_icons[iconFromButtonAndState(button, maximized)];
     if (!svgIcon.isEmpty())
         renderButtonIcon(svgIcon, painter, adjustedBtnRect, foregroundColor);
