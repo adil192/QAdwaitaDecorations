@@ -398,7 +398,7 @@ QMargins QAdwaitaDecorations::margins(MarginsType marginsType) const
                     tilingStates & QWaylandWindow::WindowTiledBottom ? 0 : sideMargins);
 }
 #else
-QMargins QAdwaitaDecorations::margins() const
+QMargins QAdwaitaDecorations::margins(MarginsType marginsType) const
 {
     if (window()->windowStates() & Qt::WindowMaximized) {
         // Maximized windows don't have anything around, no shadows, border,
