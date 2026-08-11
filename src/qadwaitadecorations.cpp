@@ -202,16 +202,19 @@ void QAdwaitaDecorations::updateColors(bool useDarkColors, bool tryAgainIfMismat
     const QPalette palette = QGuiApplication::palette();
     const bool isPaletteDark = palette.color(QPalette::Window).lightness() < 128;
 
+    static bool retryUseDarkColors;
+    retryUseDarkColors = useDarkColors;
+
     if (reUpdateColorsTimer != nullptr) {
         reUpdateColorsTimer->stop();
-        reUpdateColorsTimer->deleteLater();
-        reUpdateColorsTimer = nullptr;
     }
     if (useDarkColors != isPaletteDark && tryAgainIfMismatched) {
-        reUpdateColorsTimer = new QTimer(this);
-        connect(reUpdateColorsTimer, &QTimer::timeout, this,
-                [this, useDarkColors]() { updateColors(useDarkColors, false); });
-        reUpdateColorsTimer->setSingleShot(true);
+        if (reUpdateColorsTimer == nullptr) {
+            reUpdateColorsTimer = new QTimer(this);
+            connect(reUpdateColorsTimer, &QTimer::timeout, this,
+                    [this]() { updateColors(retryUseDarkColors, false); });
+            reUpdateColorsTimer->setSingleShot(true);
+        }
         reUpdateColorsTimer->start(5000);
     }
 
