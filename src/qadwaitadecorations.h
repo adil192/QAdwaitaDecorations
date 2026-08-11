@@ -21,6 +21,7 @@
 #define QADWAITA_DECORATIONS_H
 
 #include <QtCore/QDateTime>
+#include <QtCore/QTimer>
 #include <QtGui/QPixmap>
 
 #include <QtWaylandClient/private/qwaylandabstractdecoration_p.h>
@@ -103,7 +104,7 @@ private:
 
     QRectF buttonRect(Button button) const;
 
-    QTimer *reUpdateColorsTimer = 0;
+    QTimer *reUpdateColorsTimer = nullptr;
 
     // Default GNOME configuraiton
     Placement m_placement = Right;
