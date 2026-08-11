@@ -104,7 +104,8 @@ private:
 
     QRectF buttonRect(Button button) const;
 
-    QTimer *reUpdateColorsTimer = nullptr;
+    QTimer *m_reUpdateColorsTimer = nullptr;
+    bool m_retryUseDarkColors = false;
 
     // Default GNOME configuraiton
     Placement m_placement = Right;
