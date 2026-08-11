@@ -66,7 +66,6 @@ The code is under [LGPL 2.1](https://www.gnu.org/licenses/old-licenses/lgpl-2.1.
 
 People on the internet are always talking about getting "left behind" if we don't embrace AI.
 Since I'm less familiar with C++, I gave GitHub Copilot some small tasks.
-It was disappointing.
 
 - [`updateColors`](https://github.com/adil192/QAdwaitaDecorations/blob/950c12ef0e4aed9d2a9c5a7bf327bd5f16a5a1fc/src/qadwaitadecorations.cpp#L192):
 
@@ -82,4 +81,6 @@ It was disappointing.
   I used GitHub Copilot to generate a rounded rectangle path where only the top right corner was rounded and not the other corners.
 
   It needed prompting a few times and I needed to fix up the code style.
-  I didn't bother using AI for anything else. 
+  I didn't bother using AI for anything else.
+
+I also use AI code review to catch my newbie C++ mistakes, which is actually quite good.
