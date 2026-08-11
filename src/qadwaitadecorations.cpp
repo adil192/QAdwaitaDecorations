@@ -24,6 +24,7 @@
 #include <QtWaylandClient/private/qwaylandwindow_p.h>
 
 #include <QtCore/QLoggingCategory>
+#include <QtCore/QTimer>
 #include <QScopeGuard>
 
 #include <QtGui/QColor>
@@ -191,11 +192,28 @@ static QColor makeTransparent(const QColor &color, qreal level)
 
 void QAdwaitaDecorations::updateColors(bool useDarkColors)
 {
+    updateColors(useDarkColors, true);
+}
+void QAdwaitaDecorations::updateColors(bool useDarkColors, bool tryAgainIfMismatched)
+{
     qCDebug(QAdwaitaDecorationsLog)
             << "Changing color scheme to " << (useDarkColors ? "dark" : "light");
 
     const QPalette palette = QGuiApplication::palette();
     const bool isPaletteDark = palette.color(QPalette::Window).lightness() < 128;
+
+    if (reUpdateColorsTimer != 0) {
+        reUpdateColorsTimer->stop();
+        delete reUpdateColorsTimer;
+        reUpdateColorsTimer = 0;
+    }
+    if (useDarkColors != isPaletteDark && tryAgainIfMismatched) {
+        reUpdateColorsTimer = new QTimer(this);
+        connect(reUpdateColorsTimer, &QTimer::timeout, this,
+                [this, useDarkColors]() { updateColors(useDarkColors, false); });
+        reUpdateColorsTimer->setSingleShot(true);
+        reUpdateColorsTimer->start(5000);
+    }
 
     if (useDarkColors == isPaletteDark) {
         // If darkness matches, use palette from system theme

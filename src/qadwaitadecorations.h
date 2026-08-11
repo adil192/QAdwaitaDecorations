@@ -81,6 +81,7 @@ private Q_SLOTS:
 private:
     void initConfiguration();
     void updateColors(bool useDarkColors);
+    void updateColors(bool useDarkColors, bool tryAgainIfMismatched);
     void updateIcons();
     void updateTitlebarLayout(const QString &layout);
     QRect windowContentGeometry() const;
@@ -101,6 +102,8 @@ private:
     bool updateButtonHoverState(Button hoveredButton);
 
     QRectF buttonRect(Button button) const;
+
+    QTimer *reUpdateColorsTimer = 0;
 
     // Default GNOME configuraiton
     Placement m_placement = Right;
