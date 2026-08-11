@@ -7,7 +7,7 @@ just taking the parts I like, namely the bigger titlebar buttons.
 Features:
 - **Bigger titlebar buttons**: The minimize, maximize, and close buttons are much easier to click.
 - **System theme support**: The titlebar and buttons use colors from your QPalette. On GNOME, you may use `qt6ct` to customize your Qt theme.
-- **Light/dark theme switching**: The titlebar instantly changes between light/dark mode without needing to restart the app. If the QPalette is mismatched (qt6ct takes a few seconds to update), it will fall back to Adwaita colors.
+- **Light/dark theme switching**: The titlebar instantly changes between light/dark mode without needing to restart the app.
 
 Missing features:
 - **Flatpak support**: This currently only works with native packages, not Flatpaks.
