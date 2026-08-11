@@ -21,6 +21,7 @@
 #define QADWAITA_DECORATIONS_H
 
 #include <QtCore/QDateTime>
+#include <QtCore/QTimer>
 #include <QtGui/QPixmap>
 
 #include <QtWaylandClient/private/qwaylandabstractdecoration_p.h>
@@ -81,6 +82,7 @@ private Q_SLOTS:
 private:
     void initConfiguration();
     void updateColors(bool useDarkColors);
+    void updateColors(bool useDarkColors, bool tryAgainIfMismatched);
     void updateIcons();
     void updateTitlebarLayout(const QString &layout);
     QRect windowContentGeometry() const;
@@ -101,6 +103,9 @@ private:
     bool updateButtonHoverState(Button hoveredButton);
 
     QRectF buttonRect(Button button) const;
+
+    QTimer *m_reUpdateColorsTimer = nullptr;
+    bool m_retryUseDarkColors = false;
 
     // Default GNOME configuraiton
     Placement m_placement = Right;

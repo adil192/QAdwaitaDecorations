@@ -7,7 +7,7 @@ just taking the parts I like, namely the bigger titlebar buttons.
 Features:
 - **Bigger titlebar buttons**: The minimize, maximize, and close buttons are much easier to click.
 - **System theme support**: The titlebar and buttons use colors from your QPalette. On GNOME, you may use `qt6ct` to customize your Qt theme.
-- **Light/dark theme switching**: The titlebar instantly changes between light/dark mode without needing to restart the app. If the QPalette is mismatched (qt6ct takes a few seconds to update), it will fall back to Adwaita colors.
+- **Light/dark theme switching**: The titlebar instantly changes between light/dark mode without needing to restart the app.
 
 Missing features:
 - **Flatpak support**: This currently only works with native packages, not Flatpaks.
@@ -66,7 +66,6 @@ The code is under [LGPL 2.1](https://www.gnu.org/licenses/old-licenses/lgpl-2.1.
 
 People on the internet are always talking about getting "left behind" if we don't embrace AI.
 Since I'm less familiar with C++, I gave GitHub Copilot some small tasks.
-It was disappointing.
 
 - [`updateColors`](https://github.com/adil192/QAdwaitaDecorations/blob/950c12ef0e4aed9d2a9c5a7bf327bd5f16a5a1fc/src/qadwaitadecorations.cpp#L192):
 
@@ -82,4 +81,6 @@ It was disappointing.
   I used GitHub Copilot to generate a rounded rectangle path where only the top right corner was rounded and not the other corners.
 
   It needed prompting a few times and I needed to fix up the code style.
-  I didn't bother using AI for anything else. 
+  I didn't bother using AI for anything else.
+
+I also use AI code review to catch my newbie C++ mistakes, which is actually quite good.
