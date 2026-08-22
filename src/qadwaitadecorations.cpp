@@ -761,6 +761,9 @@ bool QAdwaitaDecorations::handleMouse(QWaylandInputDevice *inputDevice, const QP
 
     if (local.y() > margins().top()) {
         updateButtonHoverState(Button::None);
+#if QT_CONFIG(cursor)
+        waylandWindow()->restoreMouseCursor(inputDevice);
+#endif
     }
 
     // Figure out what area mouse is in
@@ -858,6 +861,9 @@ void QAdwaitaDecorations::processMouseTop(QWaylandInputDevice *inputDevice, cons
     if (!buttonRect(Close).contains(local) && !buttonRect(Maximize).contains(local)
         && !buttonRect(Minimize).contains(local)) {
         updateButtonHoverState(Button::None);
+#if QT_CONFIG(cursor)
+        waylandWindow()->restoreMouseCursor(inputDevice);
+#endif
     }
 
     if (local.y() <= surfaceRect.top() + margins().bottom()) {
@@ -902,14 +908,23 @@ void QAdwaitaDecorations::processMouseTop(QWaylandInputDevice *inputDevice, cons
             m_hoveredButtons.setFlag(Close, false);
         }
         updateButtonHoverState(Close);
+#if QT_CONFIG(cursor)
+        waylandWindow()->restoreMouseCursor(inputDevice);
+#endif
     } else if (m_buttons.contains(Maximize) && buttonRect(Maximize).contains(local)) {
         updateButtonHoverState(Maximize);
+#if QT_CONFIG(cursor)
+        waylandWindow()->restoreMouseCursor(inputDevice);
+#endif
         if (clickButton(b, Maximize)) {
             window()->setWindowStates(window()->windowStates() ^ Qt::WindowMaximized);
             m_hoveredButtons.setFlag(Maximize, false);
         }
     } else if (m_buttons.contains(Minimize) && buttonRect(Minimize).contains(local)) {
         updateButtonHoverState(Minimize);
+#if QT_CONFIG(cursor)
+        waylandWindow()->restoreMouseCursor(inputDevice);
+#endif
         if (clickButton(b, Minimize)) {
             window()->setWindowState(Qt::WindowMinimized);
             m_hoveredButtons.setFlag(Minimize, false);
