@@ -194,20 +194,19 @@ void QAdwaitaDecorations::updateColors(bool useDarkColors)
 {
     updateColors(useDarkColors, true);
 }
-void QAdwaitaDecorations::updateColors(bool useDarkColors, bool tryAgainIfMismatched)
+void QAdwaitaDecorations::updateColors(bool dark, bool tryAgainIfMismatched)
 {
-    qCDebug(QAdwaitaDecorationsLog)
-            << "Changing color scheme to " << (useDarkColors ? "dark" : "light");
+    qCDebug(QAdwaitaDecorationsLog) << "Changing color scheme to " << (dark ? "dark" : "light");
 
     const QPalette palette = QGuiApplication::palette();
     const bool isPaletteDark = palette.color(QPalette::Window).lightness() < 128;
 
-    m_retryUseDarkColors = useDarkColors;
+    m_retryUseDarkColors = dark;
 
     if (m_reUpdateColorsTimer != nullptr) {
         m_reUpdateColorsTimer->stop();
     }
-    if (useDarkColors != isPaletteDark && tryAgainIfMismatched) {
+    if (dark != isPaletteDark && tryAgainIfMismatched) {
         if (m_reUpdateColorsTimer == nullptr) {
             m_reUpdateColorsTimer = new QTimer(this);
             connect(m_reUpdateColorsTimer, &QTimer::timeout, this,
@@ -217,38 +216,53 @@ void QAdwaitaDecorations::updateColors(bool useDarkColors, bool tryAgainIfMismat
         m_reUpdateColorsTimer->start(5000);
     }
 
-    if (useDarkColors == isPaletteDark) {
+    if (dark == isPaletteDark) {
         // If darkness matches, use palette from system theme
-        const QColor highlight = palette.color(QPalette::Highlight);
         m_colors = {
             { Background, palette.color(QPalette::Active, QPalette::Window) },
             { BackgroundInactive, palette.color(QPalette::Inactive, QPalette::Window) },
             { Foreground, palette.color(QPalette::Active, QPalette::WindowText) },
             { ForegroundInactive, palette.color(QPalette::Inactive, QPalette::WindowText) },
-            { Border,
-              useDarkColors ? palette.color(QPalette::Dark) : palette.color(QPalette::Light) },
+            { Border, dark ? palette.color(QPalette::Dark) : palette.color(QPalette::Light) },
             { BorderInactive,
-              useDarkColors ? palette.color(QPalette::Mid) : palette.color(QPalette::Midlight) },
+              dark ? palette.color(QPalette::Mid) : palette.color(QPalette::Midlight) },
             { Shadow, palette.color(QPalette::Dark) },
-            { ButtonBackground, QColorConstants::Transparent },
-            { ButtonBackgroundInactive, QColorConstants::Transparent },
-            { HoveredButtonBackground, makeTransparent(highlight, 0.1) },
-            { PressedButtonBackground, makeTransparent(highlight, 0.5) }
+
+            // Copied from Adwaita
+            { NonDestructiveButtonForegroundHovered, dark ? QColor(0xffffff) : QColor(0x333338) },
+            { NonDestructiveButtonBackgroundHovered, dark ? QColor(0x6c6c6f) : QColor(0xc2c2c3) },
+            { NonDestructiveButtonBackgroundPressed, dark ? QColor(0x48484a) : QColor(0xdadadb) },
+            { DestructiveButtonForegroundHovered, QColor(0xffffff) },
+            { DestructiveButtonBackgroundHovered, dark ? QColor(0xc01c28) : QColor(0xe01b24) },
+            { DestructiveButtonBackgroundPressed, dark ? QColor(0x7a181f) : QColor(0xec767c) },
         };
     } else {
         // Otherwise, use regular Adwaita colors
+        // https://gnome.pages.gitlab.gnome.org/libadwaita/doc/main/css-variables.html
         m_colors = {
-            { Background, useDarkColors ? QColor(0x2e2e32) : QColor(0xffffff) },
-            { BackgroundInactive, useDarkColors ? QColor(0x222226) : QColor(0xfafafb) },
-            { Foreground, useDarkColors ? QColor(0xffffff) : QColor(0x333338) },
-            { ForegroundInactive, useDarkColors ? QColor(0x919193) : QColor(0x969699) },
-            { Border, useDarkColors ? QColor(0x3d3d40) : QColor(0xc8c8c8) },
-            { BorderInactive, useDarkColors ? QColor(0x313135) : QColor(0xe2e2e2) },
-            { Shadow, useDarkColors ? QColor(0x2e2e32) : QColor(0x2e2e32) },
-            { ButtonBackground, QColorConstants::Transparent },
-            { ButtonBackgroundInactive, QColorConstants::Transparent },
-            { HoveredButtonBackground, useDarkColors ? QColor(0x4d4d51) : QColor(0xe0e0e1) },
-            { PressedButtonBackground, useDarkColors ? QColor(0x6c6c6f) : QColor(0xc2c2c3) }
+            // --headerbar-bg-color
+            { Background, dark ? QColor(0x2e2e32) : QColor(0xffffff) },
+            // --headerbar-backdrop-color
+            { BackgroundInactive, dark ? QColor(0x222226) : QColor(0xfafafb) },
+            // --headerbar-fg-color
+            { Foreground, dark ? QColor(0xffffff) : QColor(0x333338) },
+            // --headerbar-fg-color at half opacity
+            { ForegroundInactive, dark ? QColor(0x898989) : QColor(0x99999b) },
+
+            { Border, dark ? QColor(0x3d3d40) : QColor(0xc8c8c8) },
+            { BorderInactive, dark ? QColor(0x313135) : QColor(0xe2e2e2) },
+            { Shadow, dark ? QColor(0x2e2e32) : QColor(0x2e2e32) },
+
+            { NonDestructiveButtonForegroundHovered, dark ? QColor(0xffffff) : QColor(0x333338) },
+            { NonDestructiveButtonBackgroundHovered, dark ? QColor(0x6c6c6f) : QColor(0xc2c2c3) },
+            { NonDestructiveButtonBackgroundPressed, dark ? QColor(0x48484a) : QColor(0xdadadb) },
+
+            // --error-fg-color
+            { DestructiveButtonForegroundHovered, QColor(0xffffff) },
+            // --error-bg-color
+            { DestructiveButtonBackgroundHovered, dark ? QColor(0xc01c28) : QColor(0xe01b24) },
+            // --error-bg-color at 60% opacity
+            { DestructiveButtonBackgroundPressed, dark ? QColor(0x7a181f) : QColor(0xec767c) },
         };
     }
 
@@ -689,21 +703,32 @@ void QAdwaitaDecorations::paintButton(Button button, QPainter *painter)
     const bool active = window()->handle()->isActive();
 #endif
     const bool maximized = windowStates & Qt::WindowMaximized;
+    const bool destructive = button == Button::Close;
 
-    QColor activeBackgroundColor;
-    if (m_clicking == button)
-        activeBackgroundColor = m_colors[PressedButtonBackground];
-    else if (m_hoveredButtons.testFlag(button))
-        activeBackgroundColor = m_colors[HoveredButtonBackground];
-    else
-        activeBackgroundColor = m_colors[ButtonBackground];
-
-    const QColor buttonBackgroundColor =
-            active ? activeBackgroundColor : m_colors[ButtonBackgroundInactive];
-    const QColor foregroundColor = active ? m_colors[Foreground] : m_colors[ForegroundInactive];
+    QColor backgroundColor;
+    QColor foregroundColor;
+    if (active) {
+        if (m_clicking == button) {
+            backgroundColor = destructive ? m_colors[DestructiveButtonBackgroundPressed]
+                                          : m_colors[NonDestructiveButtonBackgroundPressed];
+            foregroundColor = destructive ? m_colors[DestructiveButtonForegroundHovered]
+                                          : m_colors[NonDestructiveButtonForegroundHovered];
+        } else if (m_hoveredButtons.testFlag(button)) {
+            backgroundColor = destructive ? m_colors[DestructiveButtonBackgroundHovered]
+                                          : m_colors[NonDestructiveButtonBackgroundHovered];
+            foregroundColor = destructive ? m_colors[DestructiveButtonForegroundHovered]
+                                          : m_colors[NonDestructiveButtonForegroundHovered];
+        } else {
+            backgroundColor = QColorConstants::Transparent;
+            foregroundColor = m_colors[Foreground];
+        }
+    } else {
+        backgroundColor = QColorConstants::Transparent;
+        foregroundColor = m_colors[ForegroundInactive];
+    }
 
     const QRect btnRect = buttonRect(button).toRect();
-    renderFlatRoundedButtonFrame(button, painter, btnRect, buttonBackgroundColor);
+    renderFlatRoundedButtonFrame(button, painter, btnRect, backgroundColor);
 
     QRect adjustedBtnRect = btnRect;
     adjustedBtnRect.setSize(QSize(ceIconSize, ceIconSize));

@@ -45,10 +45,14 @@ public:
         Border,
         BorderInactive,
         Shadow,
-        ButtonBackground,
-        ButtonBackgroundInactive,
-        HoveredButtonBackground,
-        PressedButtonBackground
+
+        NonDestructiveButtonForegroundHovered,
+        NonDestructiveButtonBackgroundHovered,
+        NonDestructiveButtonBackgroundPressed,
+
+        DestructiveButtonForegroundHovered,
+        DestructiveButtonBackgroundHovered,
+        DestructiveButtonBackgroundPressed,
     };
     enum Placement { Left = 0, Right = 1 };
     enum Button { None = 0x0, Close = 0x1, Minimize = 0x02, Maximize = 0x04 };
